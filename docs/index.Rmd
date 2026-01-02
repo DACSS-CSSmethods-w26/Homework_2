@@ -21,7 +21,7 @@ set.seed(1111)
 
 ```{r}
 ## link to file on GitHub
-fileLink='https://raw.githubusercontent.com/DACSS-CSSmethods-w26/Homework_2/refs/heads/main/hollywood.graphml'
+fileLink='https://raw.githubusercontent.com/DACSS-CSSmethods-w26/Homework_2/refs/heads/main/docs/hollywood.graphml'
 
 library(igraph) # package needed
 
@@ -90,6 +90,60 @@ b. Get Transitivity rate
 #get the transitivity rate
 transitivity(actors)/transitivity(RandomNet)
 ```
-The above code shows that the transitivity of the actors network divided by the transitivity of a random network is less than 1.  Therefore, there is not evidence that there are potential communities.
+The above code shows that the transitivity of the actors network divided by the transitivity of a random network is less than 1.  Therefore, there is not evidence that there are potential communities.  
 
+
+### 5.2 **Two approaches**
+
+a. Girvan-Newman:
+
+
+The **girvan_newman** algorithm is based on creating partitions using the centrality of nodes to create partition too. We can create something similar to the last result like this:
+
+
+```{r}
+# Membership vector will be selected based 
+# on the highest modularity score
+partition_girvanNewman_best <- cluster_edge_betweenness(actors)
+```
+
+
+The modularity:
+```{r}
+#calculate the max modularity
+max(partition_girvanNewman_best$modularity)
+```
+
+b. Louvain:
+
+
+```{r}
+#calculate communities based on the louvain algorithm (bottom-up method)
+partition_louvain_optimal <- cluster_louvain(actors)
+```
+
+The modularity:
+```{r}
+#calculate the max modularity
+max(partition_louvain_optimal$modularity)
+```
+
+### 5.3 **Plotting communities**
+
+First, creating new columns:
+
+```{r}
+#since Girvan-Newman has a higher modularity, add it to the dataset for plotting
+V(actors)$girvanNewman=as.factor(membership(partition_girvanNewman_best))
+```
+
+Now plot the one with the best modularity (Girvan-Newman):
+
+```{r}
+library(ggraph)
+
+#graph the Girvan-Newman communities
+base=ggraph(graph =actors,layout = 'fr') + geom_edge_link(alpha=0.2)
+base + geom_node_point(aes(color=girvanNewman), show.legend = T, size=4)
+```
 
